@@ -1,9 +1,11 @@
 package mapreduce
 
 import (
-	"hash/fnv"
+	//"hash/fnv"
 	"os"
 	"encoding/json"
+	"log"
+	"sort"
 )
 // doReduce manages one reduce task: it reads the intermediate
 // key/value pairs (produced by the map phase) for this task, sorts the
@@ -49,7 +51,7 @@ func doReduce(
 	// file.Close()
 	//
 	var file_kv map[string] []string
-	file_kv := make(map[string] []string, 0)
+	file_kv = make(map[string] []string, 0)
 
 	for i := 0; i < nMap; i++ {
 		inter_file_name := reduceName(jobName, i, reduceTaskNumber)
@@ -57,7 +59,7 @@ func doReduce(
 		if err != nil {
 			log.Fatal("doReduce: open intermediate file %s, error: %s", inter_file_name, err)
 		}
-		 dec := json.NewEncoder(inter_file)
+		 dec := json.NewDecoder(inter_file)
 		 for {
 			 var kv KeyValue
 			 err := dec.Decode(&kv)
@@ -74,11 +76,11 @@ func doReduce(
 		inter_file.Close()
 	}
 	var keys []string
-	keys := make([]string, 0)
+	keys = make([]string, 0)
 	for k, _ := range file_kv {
 		keys = append(keys, k)
 	}
-	sort.String(keys)
+	sort.Strings(keys)
 
 	merge_file_name := mergeName(jobName, reduceTaskNumber)
 	merge_file, err := os.Create(merge_file_name)

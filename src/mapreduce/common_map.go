@@ -4,6 +4,7 @@ import (
     "hash/fnv"
     "os"
     "encoding/json"
+    "log"
 )
 
 // doMap manages one map task: it reads one of the input files
@@ -66,9 +67,8 @@ func doMap(
         log.Fatal("doMap: read input file state %s, error: %s", inFile, err)
     }
 
-    var file_cont []byte
     file_cont := make([]byte,file_info.Size())
-    _, err := input_file.Read(file_cont)
+    _, err = input_file.Read(file_cont)
     if err != nil {
         log.Fatal("doMap: read input file content %s, error: %s", inFile, err)
     }
@@ -76,16 +76,16 @@ func doMap(
 
     file_kv := mapF(inFile,string(file_cont))
 
-    for i:=0; i<nReduce ; i++ {
+    for i:=0; i < nReduce ; i++ {
         inter_file_name := reduceName(jobName, mapTaskNumber, i)
-        inter_file, err := os.Creat(inter_file_name)
+        inter_file, err := os.Create(inter_file_name)
         if err != nil {
             log.Fatal("doMap: creat intermediate file %s, error: %s", inter_file_name, err)
         }
         //defer intermediate_file.Close()
         enc := json.NewEncoder(inter_file)
         for _, kv := range file_kv {
-            if jhash(kv.Key)%int(nReduce) == int(i) {
+            if ihash(kv.Key)%int(nReduce) == int(i) {
                 err := enc.Encode(&kv)
                 if err != nil {
                     log.Fatal("doMap: encode json for intermediate error: %s", err)
