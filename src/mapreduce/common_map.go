@@ -85,7 +85,7 @@ func doMap(
         //defer intermediate_file.Close()
         enc := json.NewEncoder(inter_file)
         for _, kv := range file_kv {
-            if ihash(kv.Key)%int(nReduce) == int(i) {
+            if ihash(kv.Key) % int(nReduce) == int(i) {
                 err := enc.Encode(&kv)
                 if err != nil {
                     log.Fatal("doMap: encode json for intermediate error: %s", err)

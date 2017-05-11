@@ -77,7 +77,7 @@ func doReduce(
 	}
 	var keys []string
 	keys = make([]string, 0)
-	for k, _ := range file_kv {
+	for k := range file_kv {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
@@ -93,6 +93,7 @@ func doReduce(
 	for _, k := range keys {
 		err := enc.Encode(KeyValue{k, reduceF(k, file_kv[k])})
 		if err != nil {
+			log.Fatal("doReduce: encode merge file error: %s", err)
 		}
 	}
 	merge_file.Close()
